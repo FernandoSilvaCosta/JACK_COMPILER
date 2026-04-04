@@ -1,4 +1,5 @@
 from enum import Enum
+from dataclasses import dataclass
 
 class TokenType(Enum):
     
@@ -55,11 +56,10 @@ class TokenType(Enum):
     EOF = "eof"
 
 
+"""REPRESENTAR OS TOKENS"""
+@dataclass
 class Token:
-    def __init__(self,type: TokenType, value: str):
-       self.type = type
-       self.value = value
-    def __repr__(self):
-        return f"Token ({self.type.name}, {self.value!r})"
-       
+    type: TokenType
+    lexeme: str
+    line: int
         
