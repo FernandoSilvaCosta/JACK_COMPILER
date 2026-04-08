@@ -199,3 +199,126 @@ def test_slash_divisao():
     assert tokens[2].lexeme == "b"
     
     print("✅ Teste do símbolo de divisão passou!")
+
+def test_codigo_jack_completo():
+    """Testa um trecho completo de código Jack."""
+    code = '''
+    class Main {
+        function void main() {
+            let x = 5;
+            return;
+        }
+    }
+    '''
+    scanner = Scanner(code)
+    tokens = scanner.tokenize()
+
+    # Verifica presença dos tipos esperados
+    tipos = [t.type for t in tokens]
+    lexemes = [t.lexeme for t in tokens]
+
+    # Verifica tipos de token
+    assert TokenType.CLASS in tipos
+    assert TokenType.FUNCTION in tipos
+    assert TokenType.IDENT in tipos
+    assert TokenType.NUMBER in tipos
+    
+    # Verifica lexemas específicos
+    assert "Main" in lexemes
+    assert "x" in lexemes
+    assert "5" in lexemes
+    
+    print("✅ Teste de integração com código Jack completo passou!")
+
+def test_codigo_mais_complexo():
+    """Testa um código Jack mais complexo com múltiplos elementos."""
+    code = '''
+    // Calcula fatorial
+    class Factorial {
+        function int compute(int n) {
+            var int result;
+            
+            if (n < 2) {
+                return 1;
+            }
+            
+            let result = n * compute(n - 1);
+            return result;
+        }
+    }
+    '''
+    scanner = Scanner(code)
+    tokens = scanner.tokenize()
+    
+    # Remove EOF para facilitar
+    tokens_sem_eof = [t for t in tokens if t.type != TokenType.EOF]
+    tipos = [t.type for t in tokens_sem_eof]
+    lexemes = [t.lexeme for t in tokens_sem_eof]
+    
+    # Verifica keywords
+    assert TokenType.CLASS in tipos
+    assert TokenType.FUNCTION in tipos
+    assert TokenType.VAR in tipos
+    assert TokenType.IF in tipos
+    assert TokenType.RETURN in tipos
+    assert TokenType.LET in tipos
+    
+    # Verifica identificadores
+    assert "Factorial" in lexemes
+    assert "compute" in lexemes
+    assert "result" in lexemes
+    assert "n" in lexemes
+    
+    # Verifica números
+    assert "2" in lexemes
+    assert "1" in lexemes
+    
+    # Verifica símbolos
+    assert "<" in lexemes
+    assert "*" in lexemes
+    assert "-" in lexemes
+    assert "(" in lexemes
+    assert ")" in lexemes
+    assert "{" in lexemes
+    assert "}" in lexemes
+    
+    print("✅ Teste de código complexo passou!")
+
+def test_codigo_com_tudo():
+    """Testa código Jack com todos os tipos de token."""
+    code = '''
+    // Comentário de linha
+    class Test {
+        /* Comentário de bloco */
+        function void run() {
+            var int a, b;
+            let a = 10;
+            let b = "hello";
+            let a = a + b;
+            return;
+        }
+    }
+    '''
+    scanner = Scanner(code)
+    tokens = scanner.tokenize()
+    tokens_sem_eof = [t for t in tokens if t.type != TokenType.EOF]
+    
+    # Agrupa por tipo
+    tipos_encontrados = set(t.type for t in tokens_sem_eof)
+    
+    # Tipos que devem estar presentes
+    tipos_esperados = {
+        TokenType.CLASS,
+        TokenType.FUNCTION,
+        TokenType.VAR,
+        TokenType.LET,
+        TokenType.RETURN,
+        TokenType.IDENT,
+        TokenType.NUMBER,
+        TokenType.STRING,
+    }
+    
+    for tipo in tipos_esperados:
+        assert tipo in tipos_encontrados, f"Tipo {tipo} não encontrado"
+    
+    print("✅ Teste com todos os tipos de token passou!")
