@@ -133,3 +133,69 @@ def test_varios_simbolos():
         assert token_to_xml(tokens_sem_eof[i]) == f'<symbol> {simbolo} </symbol>'
     
     print("✅ Teste de vários símbolos passou!")
+
+
+def test_comentarios_ignorados():
+    """Testa que comentários são ignorados."""
+    code = "let x = 5; // isto some"
+    scanner = Scanner(code)
+    tokens = [t for t in scanner.tokenize() if t.type != TokenType.EOF]
+
+    # Nenhum token de comentário deve aparecer
+    tipos = [t.type for t in tokens]
+
+    # Mas os tokens válidos permanecem
+    lexemes = [t.lexeme for t in tokens]
+    assert "let" in lexemes
+    assert "x" in lexemes
+    assert "5" in lexemes
+    
+    print("✅ Teste de comentário de linha passou!")
+
+def test_comentario_bloco():
+    """Testa comentário de bloco /* ... */."""
+    code = "let /* comentário */ x = 5;"
+    scanner = Scanner(code)
+    tokens = [t for t in scanner.tokenize() if t.type != TokenType.EOF]
+    
+    lexemes = [t.lexeme for t in tokens]
+    assert "let" in lexemes
+    assert "x" in lexemes
+    assert "5" in lexemes
+    # A palavra 'comentário' não deve aparecer
+    assert "comentário" not in lexemes
+    
+    print("✅ Teste de comentário de bloco passou!")
+
+def test_comentario_aninhado():
+    """Testa comentários múltiplos."""
+    code = """
+    // comentário linha 1
+    let a = 10;
+    /* comentário bloco */
+    let b = 20;
+    """
+    scanner = Scanner(code)
+    tokens = [t for t in scanner.tokenize() if t.type != TokenType.EOF]
+    
+    lexemes = [t.lexeme for t in tokens]
+    assert lexemes.count("let") == 2
+    assert "a" in lexemes
+    assert "b" in lexemes
+    assert "10" in lexemes
+    assert "20" in lexemes
+    
+    print("✅ Teste de comentários múltiplos passou!")
+
+def test_slash_divisao():
+    """Testa que '/' sozinho é reconhecido como símbolo de divisão."""
+    code = "a / b"
+    scanner = Scanner(code)
+    tokens = [t for t in scanner.tokenize() if t.type != TokenType.EOF]
+    
+    assert tokens[0].lexeme == "a"
+    assert tokens[1].lexeme == "/"
+    assert tokens[1].type == TokenType.SLASH
+    assert tokens[2].lexeme == "b"
+    
+    print("✅ Teste do símbolo de divisão passou!")
