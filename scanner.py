@@ -124,22 +124,29 @@ class Scanner:
 
 # LEITURA DO CODIGO E TRANSFORMA EM UMA LISTA DE TOKENS
     def tokenize(self) -> list:
-        while self.current < len(self.code):
+        while not self.is_at_end():
             self.skip_whitespace()
             
             if self.is_at_end():
                 break
 
             ch = self.peek()
-            
+
             if ch.isalpha() or ch == '_':
                 self.tokens.append(self.read_identifier())
+            
             elif ch.isdigit():
                 self.tokens.append(self.read_number())
+                
             elif ch == '"':
                 self.tokens.append(self.read_string())
+                
+            elif ch in self.SYMBOLS:
+                self.advance()  # Avança para consumir o símbolo
+                self.tokens.append(Token(self.SYMBOLS[ch], ch, self.line))
+                
             else:
-                self.advance()
+                raise SyntaxError(f"Caractere ilegal '{ch}' na linha {self.line}")
 
         self.tokens.append(Token(TokenType.EOF, "", self.line))
         return self.tokens
