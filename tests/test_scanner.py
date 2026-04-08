@@ -88,3 +88,48 @@ def test_identificador_com_underscore():
     assert tokens[0].type == TokenType.IDENT
     assert tokens[0].lexeme == "minha_variavel_123"
     print("✅ Teste de identificador com underscore passou!")
+
+def test_simbolos_xml():
+    """Testa o reconhecimento de símbolos validando a saída XML."""
+    code = "x + y;"
+    scanner = Scanner(code)
+    tokens = scanner.tokenize()
+
+    # ✅ Formato XML esperado (com espaços dentro das tags)
+    esperado_xml = [
+        '<identifier> x </identifier>',
+        '<symbol> + </symbol>',
+        '<identifier> y </identifier>',
+        '<symbol> ; </symbol>',
+    ]
+    
+    # Ignora o token EOF no final
+    tokens_sem_eof = [t for t in tokens if t.type != TokenType.EOF]
+    
+    for i, xml_esperado in enumerate(esperado_xml):
+        assert token_to_xml(tokens_sem_eof[i]) == xml_esperado, \
+            f"Token {i} não corresponde:\n  Esperado: {xml_esperado}\n  Obtido:   {token_to_xml(tokens_sem_eof[i])}"
+    
+    print("✅ Teste de símbolos com XML passou!")
+
+def test_varios_simbolos():
+    """Testa vários símbolos diferentes."""
+    code = "({[]}),.;+-*/&|<>=~"
+    scanner = Scanner(code)
+    tokens = scanner.tokenize()
+    
+    # Pega todos os tokens exceto EOF
+    tokens_sem_eof = [t for t in tokens if t.type != TokenType.EOF]
+    
+    # Deve ter um token para cada símbolo
+    simbolos_esperados = list("({[]}),.;+-*/&|<>=~")
+    
+    assert len(tokens_sem_eof) == len(simbolos_esperados), \
+        f"Esperado {len(simbolos_esperados)} símbolos, mas obteve {len(tokens_sem_eof)}"
+    
+    for i, simbolo in enumerate(simbolos_esperados):
+        assert tokens_sem_eof[i].lexeme == simbolo, \
+            f"Token {i}: esperado '{simbolo}', obteve '{tokens_sem_eof[i].lexeme}'"
+        assert token_to_xml(tokens_sem_eof[i]) == f'<symbol> {simbolo} </symbol>'
+    
+    print("✅ Teste de vários símbolos passou!")
