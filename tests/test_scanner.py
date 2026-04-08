@@ -54,3 +54,37 @@ def test_string_com_espacos():
     assert tokens[0].lexeme == "hello world"
     assert token_to_xml(tokens[0]) == '<stringConstant> hello world </stringConstant>'
     print("Teste de string com espaços aprovado!")
+
+def test_identificadores_e_keywords():
+    """Testa identificadores e palavras reservadas."""
+    
+    # Teste 1: Identificador comum
+    scanner = Scanner("minhaVar123")
+    tokens = scanner.tokenize()
+    assert tokens[0].type == TokenType.IDENT
+    assert tokens[0].lexeme == "minhaVar123"
+    assert token_to_xml(tokens[0]) == '<identifier> minhaVar123 </identifier>'
+
+    # Teste 2: Palavra reservada - function
+    scanner = Scanner("function")
+    tokens = scanner.tokenize()
+    assert tokens[0].type == TokenType.FUNCTION
+    assert tokens[0].lexeme == "function"
+    assert token_to_xml(tokens[0]) == '<keyword> function </keyword>'
+    
+    # Teste 3: Palavra reservada - return
+    scanner = Scanner("return")
+    tokens = scanner.tokenize()
+    assert tokens[0].type == TokenType.RETURN
+    assert tokens[0].lexeme == "return"
+    assert token_to_xml(tokens[0]) == '<keyword> return </keyword>'
+    
+    print("✅ Teste de identificadores e keywords passou!")
+
+def test_identificador_com_underscore():
+    """Testa identificador com underscore."""
+    scanner = Scanner("minha_variavel_123")
+    tokens = scanner.tokenize()
+    assert tokens[0].type == TokenType.IDENT
+    assert tokens[0].lexeme == "minha_variavel_123"
+    print("✅ Teste de identificador com underscore passou!")
