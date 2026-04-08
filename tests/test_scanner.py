@@ -322,3 +322,121 @@ def test_codigo_com_tudo():
         assert tipo in tipos_encontrados, f"Tipo {tipo} não encontrado"
     
     print("✅ Teste com todos os tipos de token passou!")
+
+def test_validacao_nand2tetris_square_main():
+    """
+    Valida o scanner comparando com o arquivo MainT.xml oficial do nand2tetris.
+    Este é o teste definitivo para o projeto!
+    """
+    import os
+
+    # Caminhos dos arquivos
+    jack_path = 'tests/nand2tetris_files/Square/Main.jack'
+    xml_referencia_path = 'tests/nand2tetris_files/Square/MainT.xml'
+
+    # Verifica se os arquivos existem
+    assert os.path.exists(jack_path), f"Arquivo Jack não encontrado: {jack_path}"
+    assert os.path.exists(xml_referencia_path), f"Arquivo XML de referência não encontrado: {xml_referencia_path}"
+
+    # Lê o código Jack
+    with open(jack_path, 'r', encoding='utf-8') as f:
+        code = f.read()
+
+    # Gera tokens com seu scanner
+    scanner = Scanner(code)
+    tokens = scanner.tokenize()
+
+    # Gera XML no formato nand2tetris (sem EOF, com wrapper <tokens>)
+    tokens_sem_eof = [t for t in tokens if t.type != TokenType.EOF]
+    xml_output = "<tokens>\n"
+    for token in tokens_sem_eof:
+        xml_output += "  " + token.to_xml() + "\n"
+    xml_output += "</tokens>\n"
+
+    # Lê o XML de referência
+    with open(xml_referencia_path, 'r', encoding='utf-8') as f:
+        xml_referencia = f.read()
+
+    # Normaliza quebras de linha (Windows vs Linux)
+    xml_output = xml_output.replace('\r\n', '\n')
+    xml_referencia = xml_referencia.replace('\r\n', '\n')
+
+    # Comparação final
+    assert xml_output == xml_referencia, \
+        f"XML não corresponde!\n\nDiferenças encontradas."
+
+    print("✅ Validação nand2tetris Square/Main.jack PASSED!")
+    print(f"   Tokens gerados: {len(tokens_sem_eof)}")
+
+
+def test_validacao_nand2tetris_todos_arquivos():
+    """
+    Valida todos os arquivos .jack da pasta Square contra seus XML de referência.
+    """
+    import os
+
+    pasta_jack = 'tests/nand2tetris_files/Square'
+    arquivos_testados = 0
+    arquivos_passaram = 0
+
+    # Verifica se a pasta existe
+    if not os.path.exists(pasta_jack):
+        print(f"⚠️ Pasta {pasta_jack} não encontrada! Execute download_test_files.py primeiro.")
+        return
+
+    # Encontra todos os arquivos .jack
+    for filename in os.listdir(pasta_jack):
+        if filename.endswith('.jack'):
+            arquivos_testados += 1
+
+            # Caminhos
+            jack_path = os.path.join(pasta_jack, filename)
+            xml_referencia_path = os.path.join(pasta_jack, filename.replace('.jack', 'T.xml'))
+
+            # Verifica se existe XML de referência
+            if not os.path.exists(xml_referencia_path):
+                print(f"⚠️ Sem XML de referência para {filename}")
+                continue
+
+            # Lê e processa Jack
+            with open(jack_path, 'r', encoding='utf-8') as f:
+                code = f.read()
+
+            scanner = Scanner(code)
+            tokens = scanner.tokenize()
+
+            # Gera XML
+            tokens_sem_eof = [t for t in tokens if t.type != TokenType.EOF]
+            xml_output = "<tokens>\n"
+            for token in tokens_sem_eof:
+                xml_output += "  " + token.to_xml() + "\n"
+            xml_output += "</tokens>\n"
+
+            # Lê referência
+            with open(xml_referencia_path, 'r', encoding='utf-8') as f:
+                xml_referencia = f.read()
+
+            # Normaliza
+            xml_output = xml_output.replace('\r\n', '\n')
+            xml_referencia = xml_referencia.replace('\r\n', '\n')
+
+            # Compara
+            if xml_output == xml_referencia:
+                arquivos_passaram += 1
+                print(f"✅ {filename} PASSED")
+            else:
+                print(f"❌ {filename} FAILED")
+                
+                # Salva o XML gerado para debug
+                output_path = f"output/Square/{filename.replace('.jack', '_gerado.xml')}"
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(xml_output)
+                print(f"   XML gerado salvo em: {output_path}")
+
+    # Validação final
+    if arquivos_testados > 0:
+        assert arquivos_passaram == arquivos_testados, \
+            f"{arquivos_testados - arquivos_passaram} de {arquivos_testados} arquivo(s) falharam!"
+
+    print(f"\n🎉 {arquivos_passaram}/{arquivos_testados} arquivos validados com sucesso!")
