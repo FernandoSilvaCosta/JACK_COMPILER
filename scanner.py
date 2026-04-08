@@ -100,6 +100,24 @@ class Scanner:
         lexeme = self.code[start:self.current]
         self.advance()  # consome aspa de fechamento
         return Token(TokenType.STRING, lexeme, self.line)
+    
+    def read_identifier(self) -> Token:
+        """Lê um identificador ou uma palavra-chave (keyword)."""
+        # Define o ponto de início (onde está a primeira letra ou _)
+        start = self.current
+        
+        # Continua consumindo enquanto for letra, número ou underscore
+        while self.peek().isalnum() or self.peek() == '_':
+            self.advance()
+
+        # Extrai o texto completo
+        lexeme = self.code[start:self.current]
+        
+        # O pulo do gato: tenta buscar no dicionário de keywords.
+        # Se não existir, o padrão (default) é TokenType.IDENT
+        token_type = self.KEYWORDS.get(lexeme, TokenType.IDENT)
+        
+        return Token(token_type, lexeme, self.line)
 
     def is_at_end(self) -> bool:
         return self.current >= len(self.code)
@@ -114,13 +132,15 @@ class Scanner:
 
             ch = self.peek()
             
-            if ch.isdigit():
+            if ch.isalpha() or ch == '_':
+                self.tokens.append(self.read_identifier())
+            elif ch.isdigit():
                 self.tokens.append(self.read_number())
             elif ch == '"':
                 self.tokens.append(self.read_string())
             else:
                 self.advance()
-        
+
         self.tokens.append(Token(TokenType.EOF, "", self.line))
         return self.tokens
 
