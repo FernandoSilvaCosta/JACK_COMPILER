@@ -10,17 +10,20 @@ class Parser:
         self.xml_output = []   # lista para construir o XML
         self.indent_level = 0  # nível de indentação XML
 
+
     def peek(self) -> Token:
         """Retorna o token atual sem avançar."""
         if self.current < len(self.tokens):
             return self.tokens[self.current]
         return None
 
+
     def advance(self) -> Token:
         """Avança para o próximo token e retorna o atual."""
         token = self.peek()
         self.current += 1
         return token
+
 
     def match(self, expected_type: TokenType) -> Token:
         """Verifica se o token atual é do tipo esperado e avança."""
