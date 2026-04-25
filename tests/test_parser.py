@@ -47,4 +47,22 @@ def test_parse_let():
     assert "<symbol> ; </symbol>" in xml
     print("✅ Teste de letStatement passou!")
 
+def test_parse_if():
+    """Testa o reconhecimento de um ifStatement simples."""
+    code = "if (x) { let y = 1; }"
+    tokens = [t for t in Scanner(code).tokenize() if t.type != TokenType.EOF]
+
+    parser = Parser(tokens)
+    parser.parse_if()
+    xml = parser.get_xml()
+
+    assert "<ifStatement>" in xml
+    assert "<keyword> if </keyword>" in xml
+    assert "<symbol> ( </symbol>" in xml
+    assert "<symbol> ) </symbol>" in xml
+    assert "<symbol> { </symbol>" in xml
+    assert "<symbol> } </symbol>" in xml
+    print("✅ Teste de ifStatement passou!")
+
+
     

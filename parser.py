@@ -161,3 +161,43 @@ class Parser:
        self.match_symbol(';')           # ;
        self.close_tag("letStatement")
 
+    def parse_statements(self):
+       """statements → statement*"""
+       self.open_tag("statements")
+       stmt_types = (TokenType.LET, TokenType.IF,
+                     TokenType.WHILE, TokenType.DO, TokenType.RETURN)
+       while self.peek() and self.peek().type in stmt_types:
+           self.parse_statement()
+       self.close_tag("statements")
+
+    def parse_statement(self):
+       """statement → letStatement | ifStatement | whileStatement | doStatement | returnStatement"""
+       t = self.peek().type
+       if   t == TokenType.LET:    self.parse_let()
+       elif t == TokenType.IF:     self.parse_if()
+       elif t == TokenType.WHILE:  self.parse_while()
+       elif t == TokenType.DO:     self.parse_do()
+       elif t == TokenType.RETURN: self.parse_return()    
+
+    def parse_if(self):
+       """ifStatement → 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?"""
+       self.open_tag("ifStatement")
+       self.match(TokenType.IF)         # if
+       self.match_symbol('(')           # (
+       self.parse_expression()          # expression
+       self.match_symbol(')')           # )
+       self.match_symbol('{')           # {
+       self.parse_statements()          # statements
+       self.match_symbol('}')           # }
+
+       if self.peek() and self.peek().type == TokenType.ELSE:
+           self.match(TokenType.ELSE)   # else
+           self.match_symbol('{')       # {
+           self.parse_statements()      # statements
+           self.match_symbol('}')       # }
+
+       self.close_tag("ifStatement")
+
+
+
+
