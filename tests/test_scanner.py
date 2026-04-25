@@ -117,21 +117,30 @@ def test_varios_simbolos():
     code = "({[]}),.;+-*/&|<>=~"
     scanner = Scanner(code)
     tokens = scanner.tokenize()
-    
-    # Pega todos os tokens exceto EOF
+
     tokens_sem_eof = [t for t in tokens if t.type != TokenType.EOF]
-    
-    # Deve ter um token para cada símbolo
+
     simbolos_esperados = list("({[]}),.;+-*/&|<>=~")
-    
+
     assert len(tokens_sem_eof) == len(simbolos_esperados), \
         f"Esperado {len(simbolos_esperados)} símbolos, mas obteve {len(tokens_sem_eof)}"
-    
+
+    # Mapa de escape para os símbolos especiais do XML
+    escapes = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+    }
+
     for i, simbolo in enumerate(simbolos_esperados):
         assert tokens_sem_eof[i].lexeme == simbolo, \
             f"Token {i}: esperado '{simbolo}', obteve '{tokens_sem_eof[i].lexeme}'"
-        assert token_to_xml(tokens_sem_eof[i]) == f'<symbol> {simbolo} </symbol>'
-    
+
+        # Aplica escape se necessário
+        simbolo_xml = escapes.get(simbolo, simbolo)
+        assert token_to_xml(tokens_sem_eof[i]) == f'<symbol> {simbolo_xml} </symbol>', \
+            f"Token {i}: XML incorreto para '{simbolo}'"
+
     print("✅ Teste de vários símbolos passou!")
 
 
@@ -331,8 +340,8 @@ def test_validacao_nand2tetris_square_main():
     import os
 
     # Caminhos dos arquivos
-    jack_path = 'tests/nand2tetris_files/Square/Main.jack'
-    xml_referencia_path = 'tests/nand2tetris_files/Square/MainT.xml'
+    jack_path = 'tests/nand2tetris/Square/Main.jack'
+    xml_referencia_path = 'tests/nand2tetris/Square/MainT.xml'
 
     # Verifica se os arquivos existem
     assert os.path.exists(jack_path), f"Arquivo Jack não encontrado: {jack_path}"
@@ -350,7 +359,7 @@ def test_validacao_nand2tetris_square_main():
     tokens_sem_eof = [t for t in tokens if t.type != TokenType.EOF]
     xml_output = "<tokens>\n"
     for token in tokens_sem_eof:
-        xml_output += "  " + token.to_xml() + "\n"
+        xml_output += token_to_xml(token) + "\n"
     xml_output += "</tokens>\n"
 
     # Lê o XML de referência
@@ -375,7 +384,7 @@ def test_validacao_nand2tetris_todos_arquivos():
     """
     import os
 
-    pasta_jack = 'tests/nand2tetris_files/Square'
+    pasta_jack = 'tests/nand2tetris/Square'
     arquivos_testados = 0
     arquivos_passaram = 0
 
@@ -409,7 +418,7 @@ def test_validacao_nand2tetris_todos_arquivos():
             tokens_sem_eof = [t for t in tokens if t.type != TokenType.EOF]
             xml_output = "<tokens>\n"
             for token in tokens_sem_eof:
-                xml_output += "  " + token.to_xml() + "\n"
+                xml_output += token_to_xml(token) + "\n"
             xml_output += "</tokens>\n"
 
             # Lê referência
