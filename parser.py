@@ -240,3 +240,16 @@ class Parser:
        self.close_tag("doStatement")
 
 
+    def parse_return(self):
+       """lê um return expression? ;"""
+       self.open_tag("returnStatement")
+       self.match(TokenType.RETURN)     # return
+
+       # expressão é opcional
+       if self.peek() and self.peek().lexeme != ';':
+           self.parse_expression()
+
+       self.match_symbol(';')           # ;
+       self.close_tag("returnStatement")
+
+

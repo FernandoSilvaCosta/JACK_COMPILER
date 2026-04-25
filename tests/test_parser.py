@@ -93,4 +93,17 @@ def test_parse_do():
     print("✅ Teste de doStatement passou!")
 
 
-    
+def test_parse_return():
+    """Testa o reconhecimento de um returnStatement."""
+    code = "return x;"
+    tokens = [t for t in Scanner(code).tokenize() if t.type != TokenType.EOF]
+
+    parser = Parser(tokens)
+    parser.parse_return()
+    xml = parser.get_xml()
+
+    assert "<returnStatement>" in xml
+    assert "<keyword> return </keyword>" in xml
+    assert "<symbol> ; </symbol>" in xml
+    print("✅ Teste de returnStatement passou!")
+
