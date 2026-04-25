@@ -65,4 +65,16 @@ def test_parse_if():
     print("✅ Teste de ifStatement passou!")
 
 
-    
+def test_parse_while():
+    """Testa o reconhecimento de um whileStatement simples."""
+    code = "while (x) { let y = 1; }"
+    tokens = [t for t in Scanner(code).tokenize() if t.type != TokenType.EOF]
+
+    parser = Parser(tokens)
+    parser.parse_while()
+    xml = parser.get_xml()
+
+    assert "<whileStatement>" in xml
+    assert "<keyword> while </keyword>" in xml
+    print("✅ Teste de whileStatement passou!")
+

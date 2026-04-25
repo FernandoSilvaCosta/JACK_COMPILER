@@ -199,5 +199,15 @@ class Parser:
        self.close_tag("ifStatement")
 
 
-
+    def parse_while(self):
+       """lê um while (expressão) { statements }"""
+       self.open_tag("whileStatement")
+       self.match(TokenType.WHILE)      # while
+       self.match_symbol('(')           # (
+       self.parse_expression()          # expression
+       self.match_symbol(')')           # )
+       self.match_symbol('{')           # {
+       self.parse_statements()          # statements
+       self.match_symbol('}')           # }
+       self.close_tag("whileStatement")
 
