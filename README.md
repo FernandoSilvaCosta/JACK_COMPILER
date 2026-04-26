@@ -7,11 +7,38 @@
 
 ### LINGUAGEM DE PROGRAMAÇÃO USADA:
 - Python
+
+## 📁 Estrutura do Projeto
+
+jack-compiler/
+├── scanner.py          # Analisador Léxico
+├── jacktoken.py        # Token + TokenType
+├── xml_generator.py    # Geração de XML
+├── parser.py           # Analisador Sintático
+├── main.py             # Execução
+│
+├── tests/
+│   ├── test_scanner.py
+│   ├── test_parser.py
+│   └── nand2tetris/
+│       └── Square/
+│           ├── Main.jack
+│           ├── MainT.xml
+│           ├── Square.jack
+│           ├── SquareT.xml
+│           ├── SquareGame.jack
+│           └── SquareGame.xml
+│
+└── output/
+    └── Square/
+
 ---
 
 ## 🧠 Como Funciona
 
-O analisador léxico lê o código-fonte Jack e transforma em uma sequência de **tokens**, ignorando espaços em branco e comentários.
+### Etapa 1 — Analisador Léxico (Scanner)
+
+Lê o código-fonte Jack e transforma em uma sequência de **tokens**, ignorando espaços em branco e comentários.
 
 ### Tipos de Tokens Suportados
 
@@ -23,7 +50,27 @@ O analisador léxico lê o código-fonte Jack e transforma em uma sequência de 
 | `integerConstant` | `0`, `42`, `289` |
 | `stringConstant` | `"hello world"` |
 
-### Saída XML
+### Etapa 2 — Analisador Sintático (Parser)
+
+Recebe a lista de tokens e verifica se obedecem a gramática da linguagem Jack, produzindo uma **árvore sintática em XML**.
+
+### Gramática Suportada
+
+| Construção | Regra |
+|------------|-------|
+| class | 'class' className '{' classVarDec* subroutineDec* '}' |
+| classVarDec | ('static' ou 'field') type varName (',' varName)* ';' |
+| subroutineDec | ('constructor' ou 'function' ou 'method') type name '(' parameterList ')' subroutineBody |
+| letStatement | 'let' varName ('[' expression ']')? '=' expression ';' |
+| ifStatement | 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')? |
+| whileStatement | 'while' '(' expression ')' '{' statements '}' |
+| doStatement | 'do' subroutineCall ';' |
+| returnStatement | 'return' expression? ';' |
+| expression | term (op term)* |
+| term | integerConstant ou stringConstant ou varName ou subroutineCall |
+
+
+### Saída XML do Analisador Léxico
 
 Para cada token, o scanner gera uma linha XML no formato:
 
@@ -48,47 +95,64 @@ Para cada token, o scanner gera uma linha XML no formato:
 
 ### Instalando o pytest
 
-```bash
 pip install pytest
-```
+
+### Compilando um arquivo Jack
+
+python main.py caminho/arquivo.jack saida.xml
 
 ### Rodando os Testes
 
-```bash
-# Todos os testes
+python -m pytest tests/ -v -s
+
 python -m pytest tests/test_scanner.py -v -s
 
-# Um teste específico
-python -m pytest tests/test_scanner.py::test_number -v -s
-```
+python -m pytest tests/test_parser.py -v -s
 
 ---
 
 ## 🧪 Testes
 
-O projeto segue a metodologia **TDD (Test Driven Development)**. Os testes cobrem:
+O projeto segue a metodologia **TDD (Test Driven Development)**.
 
+### Scanner
 - ✅ Números inteiros
 - ✅ Símbolos
 - ✅ Keywords
 - ✅ Identificadores
 - ✅ Strings
-- ✅ Comentários de linha (`//`)
-- ✅ Comentários de bloco (`/* */`)
+- ✅ Comentários de linha e bloco
+- ✅ Validação com arquivos reais do nand2tetris
+
+### Parser
+- ✅ parse_term() — termos simples
+- ✅ parse_expression() — expressões com operadores
+- ✅ parse_let() — atribuição de variáveis
+- ✅ parse_if() — estrutura condicional
+- ✅ parse_while() — estrutura de repetição
+- ✅ parse_do() — chamada de subrotina
+- ✅ parse_return() — retorno de função
+- ✅ Estrutura completa de classes
 - ✅ Validação com arquivos reais do nand2tetris (Square, SquareGame, Main)
 
 ---
 
 ## 📦 Arquivos Principais
 
-### `jacktoken.py`
-Define `TokenType` (enum com todos os tipos de tokens) e `Token` (dataclass com `type`, `lexeme` e `line`).
+### jacktoken.py
+Define TokenType (enum com todos os tipos de tokens) e Token (dataclass com type, lexeme e line).
 
-### `xml_generator.py`
-Responsável por converter tokens em XML, incluindo escape de caracteres especiais (`&`, `<`, `>`, `"`).
+### xml_generator.py
+Converte tokens em XML, incluindo escape de caracteres especiais (&, <, >, ").
 
-### `scanner.py`
-Coração do projeto. Lê o código-fonte caractere por caractere e produz a lista de tokens.
+### scanner.py
+Lê o código-fonte caractere por caractere e produz a lista de tokens.
+
+### parser.py
+Recebe a lista de tokens e produz a árvore sintática em XML usando recursive descent parsing — uma função por não-terminal da gramática.
+
+### main.py
+Ponto de entrada do compilador. Recebe um arquivo .jack e gera o XML correspondente.
 
 ---
 
